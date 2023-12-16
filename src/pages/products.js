@@ -11,19 +11,24 @@ const Page = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     fetchProducts();
-  }, [page, rowsPerPage])
+  }, [page, rowsPerPage, searchText])
 
   const fetchProducts = async () => {
+    const offset = page * rowsPerPage
+    const params = {
+      offset: offset,
+      size: rowsPerPage,
+    }
+    if (searchText) {
+      params.title = searchText;
+    }
     try {
-      const offset = page * rowsPerPage
       const res = await axios.get("https://5c6c8bac-c2e8-43fa-8a57-a7dcdf0728e6.mock.pstmn.io/products", {
-        params: {
-          offset: offset,
-          size: rowsPerPage
-        }
+        params
       });
       const { content, number, totalElements } = res.data;
       setData(content);
@@ -41,6 +46,15 @@ const Page = () => {
     },
     []
   );
+
+  const onSearch = useCallback(
+    (value) => {
+      setPage(0);
+      setSearchText(value);
+    },
+    []
+  );
+
 
   return (
     <>
@@ -75,7 +89,9 @@ const Page = () => {
                 </Stack>
               </Stack>
             </Stack>
-            <ProductsSearch />
+            <ProductsSearch
+              onSearch={onSearch}
+            />
             <ProductsTable
               count={totalCount}
               items={data}
