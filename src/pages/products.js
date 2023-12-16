@@ -6,7 +6,13 @@ import { ProductsSearch } from 'src/sections/product/product-search';
 import { ProductsTable } from 'src/sections/product/product-table';
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+// TODO change this values based on products range prices in DB
+export const PRICE_RANGE = {
+  min: 0,
+  max: 2000
+}
 
 const Page = () => {
   const [page, setPage] = useState(0);
@@ -14,22 +20,26 @@ const Page = () => {
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [searchText, setSearchText] = useState('');
+  const [minPrice, setMinPrice] = useState(PRICE_RANGE.min);
+  const [maxPrice, setMaxPrice] = useState(PRICE_RANGE.max);
 
   useEffect(() => {
     fetchProducts();
-  }, [page, rowsPerPage, searchText])
+  }, [page, rowsPerPage, searchText, minPrice, maxPrice])
 
   const fetchProducts = async () => {
     const offset = page * rowsPerPage
     const params = {
-      offset: offset,
+      page,
       size: rowsPerPage,
+      minPrice,
+      maxPrice
     }
     if (searchText) {
       params.title = searchText;
     }
     try {
-      const res = await axios.get(`${apiUrl}/products`, {
+      const res = await axios.get(`${API_URL}/products`, {
         params
       });
       const { content, number, totalElements } = res.data;
@@ -50,9 +60,10 @@ const Page = () => {
   );
 
   const onSearch = useCallback(
-    (value) => {
-      setPage(0);
+    (value, minPrice, maxPrice) => {
       setSearchText(value);
+      setMinPrice(minPrice);
+      setMaxPrice(maxPrice);
     },
     []
   );
