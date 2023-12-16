@@ -6,6 +6,8 @@ import { ProductsSearch } from 'src/sections/product/product-search';
 import { ProductsTable } from 'src/sections/product/product-table';
 import axios from 'axios';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
 const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -27,7 +29,7 @@ const Page = () => {
       params.title = searchText;
     }
     try {
-      const res = await axios.get("https://5c6c8bac-c2e8-43fa-8a57-a7dcdf0728e6.mock.pstmn.io/products", {
+      const res = await axios.get(`${apiUrl}/products`, {
         params
       });
       const { content, number, totalElements } = res.data;
